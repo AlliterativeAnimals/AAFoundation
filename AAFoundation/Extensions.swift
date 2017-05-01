@@ -559,3 +559,166 @@ public extension Array where Element: Hashable {
         return DiffResult<Element>(uniqueToFirst: firstSet.subtracting(secondSet), uniqueToSecond: secondSet.subtracting(firstSet), containedInBoth: firstSet.intersection(secondSet))
     }
 }
+
+public extension NSLayoutConstraint {
+    /**
+     * Convenience initalizer to also set the priority during init
+     */
+    public convenience init(
+        item: Any,
+        attribute firstAttribute: NSLayoutAttribute,
+        relatedBy: NSLayoutRelation,
+        toItem: Any?,
+        attribute secondAttribute: NSLayoutAttribute,
+        multiplier: CGFloat,
+        constant: CGFloat,
+        priority: UILayoutPriority
+        ) {
+        self.init(item: item, attribute: firstAttribute, relatedBy: relatedBy, toItem: toItem, attribute: secondAttribute, multiplier: multiplier, constant: constant)
+        
+        self.priority = priority
+    }
+}
+
+public extension URL {
+    /**
+     * Convenience optional initializer to avoid another 'if let' block
+     */
+    public init?(string: String?, relativeTo: URL? = nil) {
+        if let string = string {
+            self.init(string: string, relativeTo: relativeTo)
+        } else {
+            return nil
+        }
+    }
+}
+
+public extension UIImage {
+    /**
+     * Scales image to given width, preserving ratio.
+     *
+     * - Parameter width: width to scale to
+     */
+    public func scaleImage(toWidth width: CGFloat) -> UIImage? {
+        let scalingRatio = width / self.size.width
+        let newHeight = scalingRatio * self.size.height
+        return self.scaleImage(toSize: CGSize(width: width, height: newHeight))
+    }
+    
+    /**
+     * Scales image to given height, preserving ratio.
+     *
+     * - Parameter height: height to scale to
+     */
+    public func scaleImage(toHeight height: CGFloat) -> UIImage? {
+        let scalingRatio = height / self.size.height
+        let newWidth = scalingRatio * self.size.width
+        return self.scaleImage(toSize: CGSize(width: newWidth, height: height))
+    }
+    
+    /**
+     * Scales image to given size, ignoring original ratio.
+     *
+     * - Parameter size: to scale to
+     */
+    public func scaleImage(toSize size: CGSize) -> UIImage? {
+        let newRect = CGRect(x: 0, y: 0, width: size.width, height: size.height).integral
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        if let context = UIGraphicsGetCurrentContext() {
+            context.interpolationQuality = .high
+            let flipVertical = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: size.height)
+            context.concatenate(flipVertical)
+            context.draw(self.cgImage!, in: newRect)
+            let newImage = UIImage(cgImage: context.makeImage()!)
+            UIGraphicsEndImageContext()
+            return newImage
+        }
+        return nil
+    }
+}
+
+public extension URL {
+    public enum URLQueryItemsError: Error {
+        case CannotGetComponents(fromUrl: URL)
+        case CannotGetUrl(fromComponents: URLComponents)
+    }
+
+    private func getComponents() throws -> URLComponents {
+        // Get components from current URL
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: true) else {
+            throw URLQueryItemsError.CannotGetComponents(fromUrl: self)
+        }
+        return components
+    }
+    
+    /**
+     * Replaces the given query items.
+     *
+     * Also adds missing keys if they were not in the original query items.
+     *
+     *     let aUrl = "http://example.com?foo=bar"
+     *     let replacements = [ "foo" : "replaced", "bar": "added" ]
+     *     print(
+     *         URL(string: aUrl)
+     *             .replacing(queryItems: replacements)
+     *             .absoluteString
+     *     )
+     *
+     * output:
+     *
+     *     "http://example.com?foo=baz&bar=added"
+     *
+     * - Parameter queryItems: String Dictionary of keys to replace in query items
+     */
+    public func replacing(queryItems: [String:String]) throws -> URL {
+        var components = try self.getComponents()
+        
+        let bannedKeys = Array(queryItems.keys)
+        
+        components.queryItems = (components.queryItems ?? []).filter({ !bannedKeys.contains($0.name) })
+        
+        for (key, value) in queryItems {
+            components.queryItems?.append(URLQueryItem(name: key, value: value))
+        }
+        
+        guard let url = components.url else {
+            throw URLQueryItemsError.CannotGetUrl(fromComponents: components)
+        }
+        
+        return url
+    }
+    
+    /**
+     * Removes the given query item keys
+     *
+     *     let aUrl = "http://example.com?foo=bar&baz=quux"
+     *     let removals = [ "foo", "corge" ]
+     *     print(
+     *         URL(string: aUrl)
+     *             .replacing(queryItems: replacements)
+     *             .absoluteString
+     *     )
+     *
+     * output:
+     *
+     *     "http://example.com?baz=quux"
+     *
+     * - Parameter queryItems: Array of keys to remove from query items
+     */
+    public func removing(queryItems: [String]) throws -> URL {
+        var components = try self.getComponents()
+        
+        let bannedKeys = queryItems
+        
+        components.queryItems = (components.queryItems ?? []).filter({ !bannedKeys.contains($0.name) })
+        
+        guard let url = components.url else {
+            throw URLQueryItemsError.CannotGetUrl(fromComponents: components)
+        }
+        
+        return url
+    }
+}
+
+
+
