@@ -544,7 +544,7 @@ public struct DiffResult<T: Hashable> {
     public var containedInSecond: Set<T> { return self.uniqueToSecond.union(self.containedInBoth) }
 }
 
-extension Array where Element: Hashable {
+public extension Array where Element: Hashable {
     /**
      * Returns the difference between two given arrays
      *
@@ -552,7 +552,7 @@ extension Array where Element: Hashable {
      *
      * - Returns: A DiffResult object repressenting the differences between the arrays
      */
-    func diff(other: Array<Element>) -> DiffResult<Element> {
+    public func diff(other: Array<Element>) -> DiffResult<Element> {
         let firstSet = Set(self)
         let secondSet = Set(other)
         
