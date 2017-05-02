@@ -149,9 +149,9 @@ public extension CGRect {
     /**
      * Returns true if any of the given CGPoints are within the CGRect
      */
-    public func contains(anyOf points: Array<CGPoint>) -> Bool {
+    public func contains(anyOf points: Array<CGPoint>, includingOnBoundary: Bool = true) -> Bool {
         for point in points {
-            if self.contains(point) {
+            if self.contains(point, includingOnBoundary: includingOnBoundary) {
                 return true
             }
         }
@@ -161,9 +161,9 @@ public extension CGRect {
     /**
      * Returns true if all of the given CGPoints are within the CGRect
      */
-    public func contains(allOf points: Array<CGPoint>) -> Bool {
+    public func contains(allOf points: Array<CGPoint>, includingOnBoundary: Bool = true) -> Bool {
         for point in points {
-            if !self.contains(point) {
+            if !self.contains(point, includingOnBoundary: includingOnBoundary) {
                 return false
             }
         }
@@ -173,7 +173,11 @@ public extension CGRect {
     /**
      * Returns true if the CGRect contains the given CGPoint
      */
-    public func contains(_ point: CGPoint) -> Bool {
+    public func contains(_ point: CGPoint, includingOnBoundary: Bool) -> Bool {
+        guard includingOnBoundary else {
+            return self.contains(point)
+        }
+        
         let x = point.x
         let y = point.y
         
