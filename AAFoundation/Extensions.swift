@@ -724,5 +724,23 @@ public extension URL {
     }
 }
 
-
+public extension CGAffineTransform {
+    /**
+     * Calculates the X scale involved in the transformation
+     *
+     * - Note: this uses `sqrt` so is a relatively expensive calculation. If it is possible to record the scale some other way it may be more efficient.
+     */
+    var xScale: CGFloat {
+        return sqrt(self.a * self.a + self.c * self.c);
+    }
+    
+    /**
+     * Calculates the Y scale involved in the transformation
+     *
+     * - Note: this uses `sqrt` so is a relatively expensive calculation. If it is possible to record the scale some other way it may be more efficient.
+     */
+    var yScale: CGFloat {
+        return sqrt(self.b * self.b + self.d * self.d);
+    }
+}
 
