@@ -565,6 +565,9 @@ public extension Array where Element: Hashable {
 }
 
 public extension NSLayoutConstraint {
+    #if swift(>=3.2)
+    // Not required, added to the language in Swift 4
+    #else
     /**
      * Convenience initalizer to also set the priority during init
      */
@@ -582,6 +585,7 @@ public extension NSLayoutConstraint {
         
         self.priority = priority
     }
+    #endif
 }
 
 public extension URL {
