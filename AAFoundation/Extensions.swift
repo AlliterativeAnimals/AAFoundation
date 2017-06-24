@@ -453,6 +453,7 @@ public extension UIBezierPath {
     }
 }
 
+@available(iOS 10.0, *)
 public extension UIImage {
     public struct RotationOptions: OptionSet {
         public let rawValue: Int
